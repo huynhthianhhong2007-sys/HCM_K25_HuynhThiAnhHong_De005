@@ -22,78 +22,40 @@ let employees = [
     }
 ];
 
-// Chuẩn hóa mã nhân viên
-function validateEmployeeCode(code) {
-    if (code === "") {
-        return "Chưa nhập mã nhân viên";
-    }
-
-    if (code.length < 6) {
-        return "Độ dài nhỏ hơn 6 ký tự";
-    }
-
-    if (!code.startsWith("EMP-")) {
-        return 'Sai tiền tố "EMP-"';
-    }
-
-    if (/\s/.test(code)) {
-        return "Mã nhân viên không được chứa khoảng trắng";
-    }
-
-    if (findEmployeeIndex(code) !== -1) {
-        return "Mã nhân viên đã tồn tại";
-    }
-
-    return "";
-}
-
-// Tìm vị trí nhân viên theo mã
 function findEmployeeIndex(code) {
     for (let i = 0; i < employees.length; i++) {
         if (employees[i].employeeCode === code) {
             return i;
         }
     }
-
     return -1;
 }
 
-// Chuẩn hóa chuỗi
-function normalizeText(rawText) {
-    return rawText
-        .trim()
-        .split(/\s+/)
-        .map(word => {
-            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-        })
-        .join(" ");
+function normalizeText(text) {
+    return text.trim().split(/\s+/).map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    }).join(" ");
 }
 
-// Nhập số nguyên trong khoảng cho phép
-function inputIntegerInRange(message, min, max) {
+function inputNumber(message, min, max) {
     while (true) {
-        let input = prompt(message);
+        let number = prompt(message);
 
-        if (input === null) {
+        if (number === null) {
             return null;
         }
 
-        input = input.trim();
+        number = number.trim();
 
-        if (input === "") {
-            console.log("Lỗi: Chưa nhập, nhập lại");
+        if (number === "" || !Number.isInteger(Number(number))) {
+            console.log("Vui lòng nhập số nguyên");
             continue;
         }
 
-        let number = Number(input);
-
-        if (!Number.isInteger(number)) {
-            console.log("Lỗi: Không phải số nguyên, nhập lại");
-            continue;
-        }
+        number = Number(number);
 
         if (number < min || number > max) {
-            console.log(`Lỗi: Ngoài phạm vi ${min} - ${max}, nhập lại`);
+            console.log(`Vui lòng nhập từ ${min} đến ${max}`);
             continue;
         }
 
@@ -101,7 +63,6 @@ function inputIntegerInRange(message, min, max) {
     }
 }
 
-// Hiển thị danh sách nhân viên
 function displayEmployees(list) {
     if (list.length === 0) {
         console.log("Danh sách nhân viên trống");
@@ -109,114 +70,96 @@ function displayEmployees(list) {
     }
 
     for (let i = 0; i < list.length; i++) {
-        console.log(
-            `${i + 1}. ${list[i].employeeCode} - ${list[i].fullName} - ${list[i].department}`
-        );
-
-        console.log(
-            `Tuổi: ${list[i].age} | Số năm kinh nghiệm: ${list[i].experienceYears}`
-        );
+        console.log(`${i + 1}. ${list[i].employeeCode} - ${list[i].fullName}`);
+        console.log(`Phòng ban: ${list[i].department}`);
+        console.log(`Tuổi: ${list[i].age}`);
+        console.log(`Kinh nghiệm: ${list[i].experienceYears} năm`);
+        console.log("----------------------------------------");
     }
 
-    console.log(`Tổng: ${list.length} nhân viên`);
+    console.log(`Tổng số nhân viên: ${list.length}`);
 }
 
-// Hiển thị menu
 function showMenu() {
     console.log("========================================");
-    console.log("HỆ THỐNG QUẢN LÝ NHÂN VIÊN CÔNG TY SKYTECH");
+    console.log("QUẢN LÝ NHÂN VIÊN SKYTECH");
     console.log("========================================");
     console.log("1. Hiển thị danh sách nhân viên");
-    console.log("2. Thêm nhân viên mới");
-    console.log("3. Cập nhật thông tin nhân viên");
+    console.log("2. Thêm nhân viên");
+    console.log("3. Cập nhật nhân viên");
     console.log("4. Xóa nhân viên");
-    console.log("5. Tìm kiếm nhân viên theo phòng ban");
+    console.log("5. Tìm kiếm theo phòng ban");
     console.log("0. Thoát chương trình");
     console.log("========================================");
 }
 
-// Case 1: Hiển thị danh sách
 function showEmployees() {
     displayEmployees(employees);
 }
 
-// Case 2: Thêm nhân viên
 function addEmployee() {
     let code = prompt("Nhập mã nhân viên");
 
     if (code === null) {
-        console.log("Đã hủy thao tác thêm");
         return;
     }
 
     code = code.trim().toUpperCase();
 
-    let error = validateEmployeeCode(code);
+    if (code === "") {
+        console.log("Mã nhân viên không được để trống");
+        return;
+    }
 
-    if (error !== "") {
-        console.log("Lỗi: " + error);
+    if (code.length < 6 || !code.startsWith("EMP-") || /\s/.test(code)) {
+        console.log("Mã nhân viên không hợp lệ");
+        return;
+    }
+
+    if (findEmployeeIndex(code) !== -1) {
+        console.log("Mã nhân viên đã tồn tại");
         return;
     }
 
     let fullName = prompt("Nhập họ tên");
 
     if (fullName === null) {
-        console.log("Đã hủy thao tác thêm");
         return;
     }
 
     fullName = normalizeText(fullName);
 
-    while (fullName === "") {
+    if (fullName === "") {
         console.log("Họ tên không được để trống");
-
-        fullName = prompt("Nhập lại họ tên");
-
-        if (fullName === null) {
-            console.log("Đã hủy thao tác thêm");
-            return;
-        }
-
-        fullName = normalizeText(fullName);
+        return;
     }
 
     let department = prompt("Nhập phòng ban");
 
     if (department === null) {
-        console.log("Đã hủy thao tác thêm");
         return;
     }
 
     department = normalizeText(department);
 
-    while (department === "") {
+    if (department === "") {
         console.log("Phòng ban không được để trống");
-
-        department = prompt("Nhập lại phòng ban");
-
-        if (department === null) {
-            console.log("Đã hủy thao tác thêm");
-            return;
-        }
-
-        department = normalizeText(department);
-    }
-
-    let age = inputIntegerInRange("Nhập tuổi (18 - 60)", 18, 60);
-
-    if (age === null) {
-        console.log("Đã hủy thao tác thêm");
         return;
     }
 
-    let experienceYears = inputIntegerInRange(
-        "Nhập số năm kinh nghiệm (0 - 40)",
+    let age = inputNumber("Nhập tuổi từ 18 đến 60", 18, 60);
+
+    if (age === null) {
+        return;
+    }
+
+    let experienceYears = inputNumber(
+        "Nhập số năm kinh nghiệm từ 0 đến 40",
         0,
         40
     );
 
     if (experienceYears === null) {
-        console.log("Đã hủy thao tác thêm");
         return;
     }
 
@@ -234,12 +177,10 @@ function addEmployee() {
     displayEmployees([newEmployee]);
 }
 
-// Case 3: Cập nhật nhân viên
 function updateEmployee() {
     let code = prompt("Nhập mã nhân viên cần cập nhật");
 
     if (code === null) {
-        console.log("Đã hủy thao tác cập nhật");
         return;
     }
 
@@ -248,46 +189,37 @@ function updateEmployee() {
     let index = findEmployeeIndex(code);
 
     if (index === -1) {
-        console.log(`Không tìm thấy nhân viên có mã ${code}`);
+        console.log("Không tìm thấy nhân viên");
         return;
     }
 
-    let oldAge = employees[index].age;
-    let oldExperience = employees[index].experienceYears;
+    let age = inputNumber("Nhập tuổi mới từ 18 đến 60", 18, 60);
 
-    let newAge = inputIntegerInRange("Nhập tuổi mới (18 - 60)", 18, 60);
-
-    if (newAge === null) {
-        console.log("Đã hủy thao tác cập nhật");
+    if (age === null) {
         return;
     }
 
-    let newExperience = inputIntegerInRange(
-        "Nhập số năm kinh nghiệm mới (0 - 40)",
+    let experienceYears = inputNumber(
+        "Nhập số năm kinh nghiệm mới từ 0 đến 40",
         0,
         40
     );
 
-    if (newExperience === null) {
-        console.log("Đã hủy thao tác cập nhật");
+    if (experienceYears === null) {
         return;
     }
 
-    employees[index].age = newAge;
-    employees[index].experienceYears = newExperience;
+    employees[index].age = age;
+    employees[index].experienceYears = experienceYears;
 
-    console.log("Cập nhật thành công");
-
-    console.log(`Tuổi: ${oldAge} -> ${newAge}`);
-    console.log(`Số năm kinh nghiệm: ${oldExperience} -> ${newExperience}`);
+    console.log("Cập nhật nhân viên thành công");
+    displayEmployees([employees[index]]);
 }
 
-// Case 4: Xóa nhân viên
 function deleteEmployee() {
     let code = prompt("Nhập mã nhân viên cần xóa");
 
     if (code === null) {
-        console.log("Đã hủy thao tác xóa");
         return;
     }
 
@@ -296,36 +228,28 @@ function deleteEmployee() {
     let index = findEmployeeIndex(code);
 
     if (index === -1) {
-        console.log(`Không tìm thấy nhân viên có mã ${code}`);
+        console.log("Không tìm thấy nhân viên");
         return;
     }
 
     let confirmDelete = prompt("Bạn có chắc chắn muốn xóa? (Y/N)");
 
-    if (confirmDelete === null) {
-        console.log("Đã hủy thao tác xóa");
-        return;
-    }
-
-    confirmDelete = confirmDelete.trim().toUpperCase();
-
-    if (confirmDelete !== "Y") {
+    if (confirmDelete === null || confirmDelete.trim().toUpperCase() !== "Y") {
         console.log("Đã hủy thao tác xóa");
         return;
     }
 
     employees.splice(index, 1);
 
-    console.log("Xóa thành công");
+    console.log("Xóa nhân viên thành công");
     console.log(`Còn ${employees.length} nhân viên`);
 }
 
-// Case 5: Tìm kiếm theo phòng ban
 function searchEmployeeByDepartment() {
-    let keyword = prompt("Nhập từ khóa tìm kiếm phòng ban");
+    let keyword = prompt("Nhập phòng ban cần tìm");
 
     if (keyword === null || keyword.trim() === "") {
-        console.log("Chưa nhập từ khóa tìm kiếm");
+        console.log("Từ khóa không được để trống");
         return;
     }
 
@@ -340,30 +264,40 @@ function searchEmployeeByDepartment() {
     }
 
     if (result.length === 0) {
-        console.log("Không tìm thấy nhân viên phù hợp");
+        console.log("Không tìm thấy nhân viên");
     } else {
         console.log("Kết quả tìm kiếm:");
         displayEmployees(result);
     }
 }
 
-// Chương trình chính
+function showMenu() {
+    console.log("========================================");
+    console.log("HỆ THỐNG QUẢN LÝ NHÂN VIÊN SKYTECH");
+    console.log("========================================");
+    console.log("1. Hiển thị danh sách nhân viên");
+    console.log("2. Thêm nhân viên mới");
+    console.log("3. Cập nhật thông tin nhân viên");
+    console.log("4. Xóa nhân viên");
+    console.log("5. Tìm kiếm nhân viên theo phòng ban");
+    console.log("0. Thoát chương trình");
+    console.log("========================================");
+}
+
 function main() {
     let choice;
 
     do {
         showMenu();
 
-        choice = prompt("Vui lòng nhập lựa chọn của bạn (0 - 5)");
+        choice = prompt("Nhập lựa chọn của bạn (0 - 5)");
 
         if (choice === null) {
-            console.log("Vui lòng chọn 0 để thoát chương trình");
+            choice = "";
             continue;
         }
 
-        choice = choice.trim();
-
-        switch (choice) {
+        switch (choice.trim()) {
             case "1":
                 showEmployees();
                 break;
@@ -389,10 +323,10 @@ function main() {
                 break;
 
             default:
-                console.log("Lựa chọn không hợp lệ");
+                console.log("Lựa chọn không hợp lệ!");
                 break;
         }
-    } while (choice !== "0");
+    } while (choice.trim() !== "0");
 }
 
 main();
